@@ -1,0 +1,360 @@
+{
+  "name": "Lead Notification System (Google Sheets → Telegram) [SANITIZED]",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "__GOOGLE_SHEET_ID__",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "__GOOGLE_SHEET_URL__"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "__SHEET_GID__",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "__GOOGLE_SHEET_URL__#gid=__SHEET_GID__"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -80
+      ],
+      "id": "d9802fc1-9a68-4a92-80ee-bc9e66fa178e",
+      "name": "Watch New Leads (Google Sheets)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9b46899-15eb-4c4c-8485-104dbd53f5b5",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "77563938-2b5a-49b7-873e-b54161456372",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "5b11d6f4-cb71-4b0c-aa4b-8a5f7757ceac",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "f0ee6cf4-95e2-4460-a061-ee5e79ac5dd2",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "ec281981-2fcb-447c-86c7-8a7a535232ac",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "289b0a29-98fa-466a-946e-3c2e36065554",
+              "name": "sent",
+              "value": "={{ !!$json.sent }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        -80
+      ],
+      "id": "4bb01c9b-7f70-4cb4-a919-4379edf70080",
+      "name": "Normalize Lead Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "544cb93e-818b-42b2-8567-da2868371f6b",
+              "leftValue": "={{ $json.sent }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        -80
+      ],
+      "id": "4f41964d-d9f4-46bb-9b73-9c66bcaf0bb4",
+      "name": "Validate New Lead"
+    },
+    {
+      "parameters": {
+        "chatId": "__TELEGRAM_CHAT_ID__",
+        "text": "👤 Имя: {{$json.name}}\n📞 Телефон: {{$json.phone}}\n💬 Сообщение:\n{{$json.message}}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        -96
+      ],
+      "id": "d39becaa-d5a0-49a5-b278-7ee3ee82ef47",
+      "name": "Send Lead Notification (Telegram)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keep-id-for-update",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "f8c28266-fb61-421d-b89e-ed522c140251",
+              "name": "sent",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "9a551b33-ce4b-468c-97b0-65db43c6e26b",
+              "name": "status",
+              "value": "processed",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        -96
+      ],
+      "id": "3cf53ebf-1692-475d-bb36-5fbf73ce0250",
+      "name": "Mark Lead as Processed"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "__GOOGLE_SHEET_ID__",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "__GOOGLE_SHEET_URL__"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "__SHEET_TAB_NAME__",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 0,
+            "id": "={{ $json.id }}",
+            "status": "processed",
+            "sent": "true"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sent",
+              "displayName": "sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -96
+      ],
+      "id": "cbfedbec-9566-48c5-9b48-5ff84b058348",
+      "name": "Update Lead Status in Sheet"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Watch New Leads (Google Sheets)": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Validate New Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate New Lead": {
+      "main": [
+        [
+          {
+            "node": "Send Lead Notification (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Lead Notification (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Mark Lead as Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Lead as Processed": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status in Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "REDACTED_WORKFLOW_ID",
+  "tags": []
+}
