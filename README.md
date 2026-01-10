@@ -81,3 +81,21 @@ The solution is designed without custom backend code and follows clean, producti
 
 n8n Automation Developer  
 Portfolio project
+## How to import
+
+1. Download `workflow/lead-notification-system.sanitized.json`
+2. In n8n: Workflows → Import from file
+3. Configure credentials:
+   - Google Sheets
+   - Telegram Bot
+4. Replace placeholder values:
+   - `__GOOGLE_SHEET_ID__`
+   - `__TELEGRAM_CHAT_ID__`
+5. Activate the workflow
+## Production notes
+
+- Idempotent processing (no duplicate notifications)
+- Explicit status flag in Google Sheets
+- Safe to re-run
+- No instance-specific data in public export
+
