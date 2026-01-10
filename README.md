@@ -11,6 +11,9 @@ This workflow monitors a Google Sheets table with incoming leads, validates new 
 The solution is designed without custom backend code and follows clean, production-oriented n8n architecture.
 
 ---
+## Architecture
+
+![Lead Notification Architecture](docs/screenshots/lead-notification-architecture.png)
 
 ## ⚙️ Workflow Logic
 
