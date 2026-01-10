@@ -3,9 +3,6 @@
 Production-ready n8n automation for processing leads from Google Sheets and sending instant Telegram notifications.
 
 ---
-## Architecture
-
-![Lead Notification Architecture](docs/screenshots/lead-notification-architecture.png)
 
 
 ## 🚀 Overview
